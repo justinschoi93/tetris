@@ -1,26 +1,22 @@
-class Piece {
-    constructor (shape, ctx) {
-        this.shape = shape;
+class GameModel {
+    constructor(ctx) {
         this.ctx = ctx;
-        this.y = 0;
-        this.x = Math.floor(COLS / 2);
+        this.fallingPiece = null; // will be a piece
+        this.grid = this.makeStartingGrid();
     }
 
-    renderPiece() {
-        
-        this.shape.map((row, i) => {
-            row.map((cell, j) => {
-                if (cell > 0) {
-                    const x = (this.x + j);
-                    const y = (this.y + i);
+    makeStartingGrid() {
+        let grid = [];
 
-                    this.ctx.fillStyle = COLORS[cell];
-                    this.ctx.fillRect(this.x + j, this.y + i, 1, 1);
-                }
-            })
-        })
+        for (let i = 0; i < ROWS; i++ ) {
+            grid.push([])
+            for (let j = 0; j < COLS; j++) {
+                grid[grid.length - 1].push(0);
+            }
+        }
+        return grid;
     }
-    
+
     collision(x, y) {
         const shape = this.fallingPiece.shape;
         const n = shape.length;
@@ -53,7 +49,7 @@ class Piece {
             }
         }
         
-        if (this.fallingPiece ==! null) {
+        if (this.fallingPiece !== null) {
             this.fallingPiece.renderPiece();
         }
     };
@@ -66,9 +62,9 @@ class Piece {
             const shape = this.fallingPiece.shape;
             const x = this.fallingPiece.x;
             const y = this.fallingPiece.y;
-            
+
             shape.map((row, i) => {
-                row.map((cell, i) => {
+                row.map((cell, j) => {
                     let p = x + j;
                     let q = y + i;
                     if (p >= 0 && p < COLS && q < ROWS && cell > 0) {
@@ -87,4 +83,60 @@ class Piece {
         }
         this.renderGameState();
     };
+
+    move(right) {
+        if (this.fallingPiece === null) {
+            return
+        }
+        
+        let x = this.fallingPiece.x;
+        let y = this.fallingPiece.y;
+
+        if (right) {
+            if (!this.collision(x + 1, y)) {
+                this.fallingPiece.x += 1;
+            }
+        } else {
+            if (!this.collision(x - 1, y)) {
+                this.fallingPiece.x -=1;
+            }
+        }
+        this.renderGameState();
+    }
+
+    rotate() {
+        if (this.fallingPiece) {
+            let shape = this.fallingPiece.shape
+            //transpose of matrix
+            for (let y = 0; y < shape.length; ++y) {
+                for (let x = 0; x < y; ++x) {
+                    [this.fallingPiece.shape[x][y], this.fallingPiece.shape[y][x]] = 
+                    [this.fallingPiece.shape[y][x], this.fallingPiece.shape[x][y]]
+                }
+            }
+
+            //reverse order of rows
+            this.fallingPiece.shape.forEach((row => row.reverse()))
+        }
+        this.renderGameState();
+    }
 }
+
+document.addEventListener("keydown", (e) => {
+    console.log(e.key);
+    e.preventDefault()
+    switch(e.key) {
+        case "ArrowUp":
+            model.rotate()
+            break
+        case "ArrowRight": 
+            model.move(true)
+            break
+        case "ArrowDown":
+            model.moveDown()
+            break
+        case "ArrowLeft": 
+            model.move(false)
+            break;
+    }
+})

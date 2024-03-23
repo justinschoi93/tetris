@@ -15,6 +15,7 @@ let newGameState = () => {
     if (model.fallingPiece === null) {
         const rand = Math.round(Math.random() * 6) + 1;
         const newPiece = new Piece(SHAPES[rand], ctx);
+
         model.fallingPiece = newPiece
         model.moveDown();
     } else {
@@ -40,5 +41,5 @@ const fullSend = () => {
         }
     }
 
-    scoreboaord.innerHTML = "Score: " + String(score);
+    scoreboard.innerHTML = "Score: " + String(score);
 }
